@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crônicas da Mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --texto:#ece5d8;
+    --texto-fraco:#b0a692;
+    --preto:#08070c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--preto);
+    color:var(--texto);
+    font-family:'EB Garamond', Georgia, serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* ============================================================
+     HUB
+     ============================================================ */
+  .hub{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:40px 16px 60px;
+    transition:opacity .6s, transform .6s;
+  }
+  .hub.escondido{
+    opacity:0;
+    pointer-events:none;
+    transform:scale(.96);
+    position:absolute;
+    inset:0;
+  }
+
+  .grade-banners{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    width:100%;
+    max-width:1100px;
+  }
+  @media (min-width:720px){
+    .grade-banners{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:22px;
+    }
+  }
+
+  .banner-card{
+    position:relative;
+    display:block;
+    width:100%;
+    aspect-ratio:16/9;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.12);
+    cursor:pointer;
+    text-decoration:none;
+    color:inherit;
+    transition:transform .4s cubic-bezier(.2,.8,.3,1), box-shadow .4s;
+    isolation:isolate;
+    animation:surgir .7s cubic-bezier(.2,.8,.3,1) backwards;
+  }
+  .banner-card:nth-child(1){animation-delay:.1s;}
+  .banner-card:nth-child(2){animation-delay:.22s;}
+  .banner-card:nth-child(3){animation-delay:.34s;}
+  @keyframes surgir{from{opacity:0; transform:translateY(30px) scale(.97);}}
+
+  .banner-card:hover, .banner-card:focus-visible{
+    transform:translateY(-8px) scale(1.01);
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.95);
+    outline:none;
+  }
+  .banner-card img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .7s cubic-bezier(.2,.8,.3,1), filter .5s;
+  }
+  .banner-card:hover img{
+    transform:scale(1.05);
+    filter:brightness(.8);
+  }
+  .banner-card::after{
+    content:"▸";
+    position:absolute;
+    top:14px; right:16px;
+    width:34px; height:34px;
+    border-radius:50%;
+    display:grid; place-items:center;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    font-size:1rem;
+    opacity:0;
+    transform:translateX(-6px);
+    transition:opacity .35s, transform .35s;
+    backdrop-filter:blur(6px);
+  }
+  .banner-card:hover::after{opacity:1; transform:none;}
+
+  /* ============================================================
+     PÁGINAS
+     ============================================================ */
+  .pagina{
+    display:none;
+    min-height:100vh;
+    padding:0 0 80px;
+    animation:entrarPagina .6s cubic-bezier(.2,.8,.3,1);
+  }
+  .pagina.ativa{display:block;}
+  @keyframes entrarPagina{from{opacity:0; transform:translateY(24px);}}
+
+  .barra-voltar{
+    position:sticky;
+    top:0;
+    z-index:50;
+    padding:14px 18px;
+    background:linear-gradient(180deg, rgba(8,7,12,.95), transparent);
+    backdrop-filter:blur(8px);
+  }
+  .btn-voltar{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.18);
+    color:var(--texto);
+    font-family:'EB Garamond', serif;
+    font-size:.95rem;
+    padding:9px 16px;
+    border-radius:30px;
+    cursor:pointer;
+    transition:background .25s, border-color .25s, transform .25s;
+  }
+  .btn-voltar:hover{
+    background:rgba(255,255,255,.12);
+    border-color:var(--cor-pagina, #fff);
+    transform:translateX(-3px);
+  }
+  .btn-voltar::before{content:"←"; font-size:1.1rem;}
+
+  .pagina-inner{
+    max-width:780px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+  @media (min-width:720px){
+    .pagina-inner{padding:0 32px;}
+  }
+
+  .pagina-banner{
+    position:relative;
+    width:100%;
+    max-width:780px;
+    margin:0 auto 32px;
+    border-radius:0 0 20px 20px;
+    overflow:hidden;
+    aspect-ratio:16/9;
+    max-height:420px;
+  }
+  .pagina-banner img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .pagina-banner .sombra{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(0deg, var(--fundo-pagina, #08070c) 0%, transparent 55%);
+  }
+
+  .pagina-titulo{
+    font-family:'Cinzel', Georgia, serif;
+    font-size:clamp(1.8rem, 7vw, 2.8rem);
+    letter-spacing:.04em;
+    line-height:1.15;
+    margin-bottom:6px;
+    position:relative;
+  }
+  .pagina-sub{
+    font-size:.82rem;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--texto-fraco);
+    margin-bottom:30px;
+  }
+
+  .info-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+    margin-bottom:28px;
+  }
+  @media (min-width:560px){
+    .info-grid{grid-template-columns:repeat(4, 1fr);}
+  }
+  .info-item{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .info-item .rotulo{
+    font-size:.68rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--texto-fraco);
+    margin-bottom:4px;
+  }
+  .info-item .valor{
+    font-size:1rem;
+    line-height:1.3;
+    color:var(--texto);
+    font-weight:500;
+  }
+
+  .bloco-texto{
+    margin-bottom:28px;
+    opacity:0;
+    transform:translateY(26px);
+    transition:opacity .7s cubic-bezier(.2,.8,.3,1), transform .7s cubic-bezier(.2,.8,.3,1);
+  }
+  .bloco-texto.visivel{
+    opacity:1;
+    transform:none;
+  }
+  .bloco-texto h3{
+    font-family:'Cinzel', Georgia, serif;
+    font-size:.76rem;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--destaque);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+  }
+  .bloco-texto h3::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, rgba(255,255,255,.2), transparent);
+  }
+  .bloco-texto p{
+    font-size:1.05rem;
+    line-height:1.75;
+    color:#d8d2c6;
+    margin-bottom:14px;
+  }
+  .bloco-texto p:last-child{margin-bottom:0;}
+
+  /* DESTAQUES COLORIDOS */
+  .destaque-roxo{color:#b388ff; font-weight:600;}
+  .destaque-vermelho{color:#e63946; font-weight:600;}
+  .destaque-dourado{color:#e8c46a; font-weight:600;}
+  .destaque-neutro{color:#fff; font-weight:600;}
+
+  .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:8px;
+  }
+  .tag{
+    font-size:.82rem;
+    padding:5px 12px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.04);
+    color:var(--texto-fraco);
+    letter-spacing:.04em;
+    transition:border-color .25s, color .25s;
+  }
+  .tag:hover{
+    border-color:var(--destaque);
+    color:var(--texto);
+  }
+
+  /* ================= CORES BASE POR PÁGINA ================= */
+
+  /* DRAKKENHEIM — ROXO */
+  #pagina-drakkenheim{
+    --cor-pagina:#b388ff;
+    --fundo-pagina:#08050c;
+    --destaque:#b388ff;
+    background:
+      radial-gradient(1000px 600px at 50% 0%, rgba(150, 80, 220, .18), transparent 65%),
+      #08050c;
+  }
+  #pagina-drakkenheim .pagina-titulo{
+    color:#b388ff;
+    text-shadow:0 0 30px rgba(179, 136, 255, .45);
+    animation:pulsoArcano 3.6s ease-in-out infinite;
+  }
+  @keyframes pulsoArcano{
+    0%, 100%{text-shadow:0 0 22px rgba(179, 136, 255, .3);}
+    50%{text-shadow:0 0 52px rgba(179, 136, 255, .8), 0 0 90px rgba(179, 136, 255, .25);}
+  }
+
+  /* EXPRESSO — VERMELHO */
+  #pagina-expresso{
+    --cor-pagina:#e63946;
+    --fundo-pagina:#0a0406;
+    --destaque:#e63946;
+    background:
+      radial-gradient(1000px 600px at 50% 0%, rgba(180, 20, 30, .22), transparent 65%),
+      #0a0406;
+  }
+  #pagina-expresso .pagina-titulo{
+    color:#e63946;
+    text-shadow:0 0 34px rgba(230, 57, 70, .5);
+  }
+  .letra-some{
+    display:inline-block;
+    animation:sumirLetra 3s ease-in-out infinite;
+  }
+  @keyframes sumirLetra{
+    0%, 100%{opacity:1; filter:blur(0);}
+    40%{opacity:.15; filter:blur(2px);}
+    60%{opacity:.6; filter:blur(.5px);}
+  }
+  .letra-some:nth-child(odd){animation-delay:.3s;}
+  .letra-some:nth-child(3n){animation-delay:.7s;}
+
+  /* PRESSÁGIO — DOURADO */
+  #pagina-pressagio{
+    --cor-pagina:#e8c46a;
+    --fundo-pagina:#0c0a05;
+    --destaque:#e8c46a;
+    background:
+      radial-gradient(1000px 600px at 50% 0%, rgba(220, 180, 80, .18), transparent 65%),
+      #0c0a05;
+  }
+  #pagina-pressagio .pagina-titulo{
+    background:linear-gradient(90deg, #e8c46a 0%, #fff8d6 25%, #e8c46a 50%, #fff8d6 75%, #e8c46a 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:brilhoDourado 6s linear infinite;
+  }
+  @keyframes brilhoDourado{to{background-position:200% center;}}
+
+  /* ============================================================
+     EFEITO DE COR PROGRESSIVA CONFORME O SCROLL
+     ============================================================ */
+  .pagina{
+    transition:background .6s ease;
+  }
+  /* O JS aplica a variável --intensidade-scroll (0 a 1) no <section> */
+
+  #pagina-drakkenheim{
+    background:
+      radial-gradient(
+        1000px 700px at 50% var(--pos-glow, 0%),
+        rgba(150, 80, 220, calc(.12 + var(--intensidade-scroll, 0) * .25)),
+        transparent 65%
+      ),
+      #08050c;
+  }
+  #pagina-expresso{
+    background:
+      radial-gradient(
+        1000px 700px at 50% var(--pos-glow, 0%),
+        rgba(200, 20, 35, calc(.12 + var(--intensidade-scroll, 0) * .3)),
+        transparent 65%
+      ),
+      #0a0406;
+  }
+  #pagina-pressagio{
+    background:
+      radial-gradient(
+        1000px 700px at 50% var(--pos-glow, 0%),
+        rgba(230, 190, 90, calc(.12 + var(--intensidade-scroll, 0) * .3)),
+        transparent 65%
+      ),
+      #0c0a05;
+  }
+
+  /* ============================================================
+     MÚSICA
+     ============================================================ */
+  .musica-info{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:36px;
+    padding-top:18px;
+    border-top:1px solid rgba(255,255,255,.08);
+    color:var(--texto-fraco);
+    font-size:.9rem;
+    letter-spacing:.04em;
+  }
+  .pulso{
+    width:10px; height:10px; border-radius:50%; flex:none;
+    background:var(--destaque);
+    box-shadow:0 0 12px var(--destaque);
+    animation:pulsar 1.8s ease-in-out infinite;
+  }
+  .pulso.pausado{animation:none; opacity:.25; box-shadow:none;}
+  @keyframes pulsar{
+    0%,100%{transform:scale(.8); opacity:.5;}
+    50%{transform:scale(1.2); opacity:1;}
+  }
+  .btn-som{
+    margin-left:auto;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.14);
+    color:var(--texto); border-radius:8px;
+    padding:6px 10px; cursor:pointer; font-size:1rem;
+    transition:background .25s, border-color .25s;
+  }
+  .btn-som:hover{background:rgba(255,255,255,.12); border-color:var(--destaque);}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
+    .bloco-texto{opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HUB
+     ============================================================ -->
+<main class="hub" id="hub">
+  <nav class="grade-banners" aria-label="Campanhas disponíveis">
+
+    <a class="banner-card" href="#" data-pagina="pagina-drakkenheim">
+      <img src="https://i.imgur.com/eVTctwS.jpeg" alt="A Cicatriz de Drakkenheim" loading="lazy">
+    </a>
+
+    <a class="banner-card" href="#" data-pagina="pagina-expresso">
+      <img src="https://i.imgur.com/IiIz5A1.jpeg" alt="Horror no Expresso do Oriente" loading="lazy">
+    </a>
+
+    <a class="banner-card" href="#" data-pagina="pagina-pressagio">
+      <img src="https://i.imgur.com/0vICNQv.jpeg" alt="Presságio do Fim" loading="lazy">
+    </a>
+
+  </nav>
+</main>
+
+<!-- ============================================================
+     PÁGINA: A CICATRIZ DE DRAKKENHEIM
+     ============================================================ -->
+<section class="pagina" id="pagina-drakkenheim">
+  <div class="barra-voltar">
+    <button class="btn-voltar" data-voltar>Voltar</button>
+  </div>
+
+  <div class="pagina-banner">
+    <img src="https://i.imgur.com/eVTctwS.jpeg" alt="A Cicatriz de Drakkenheim">
+    <div class="sombra"></div>
+  </div>
+
+  <div class="pagina-inner">
+    <h2 class="pagina-titulo">A Cicatriz de Drakkenheim</h2>
+    <p class="pagina-sub">Survival Horror · Pós-apocalíptico · Poder e Corrupção</p>
+
+    <div class="info-grid">
+      <div class="info-item"><div class="rotulo">Sistema</div><div class="valor">D&amp;D 5e</div></div>
+      <div class="info-item"><div class="rotulo">Níveis</div><div class="valor">1 – 13</div></div>
+      <div class="info-item"><div class="rotulo">Duração</div><div class="valor">Campanha longa</div></div>
+      <div class="info-item"><div class="rotulo">Vibe</div><div class="valor">Decadência e mutação</div></div>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>O dia em que o céu caiu</h3>
+      <p>Um objeto desconhecido despencou do céu e atingiu a maior cidade do reino. O impacto destruiu bairros inteiros e matou milhares de pessoas — mas o verdadeiro desastre começou depois. Nos meses seguintes, uma <span class="destaque-roxo">substância cristalina</span> passou a brotar entre as ruínas. Uma névoa tóxica se espalhou pelas ruas, e fenômenos impossíveis começaram a ocorrer: pessoas desapareciam, criaturas deformadas surgiam, e quem permanecia tempo demais na região enlouquecia, sofria mutações ou morria.</p>
+      <p>O governo tentou isolar a área. Exércitos foram enviados. Expedições foram organizadas. Nenhuma delas conseguiu resolver o problema. <span class="destaque-neutro">Quinze anos depois</span>, a cidade segue abandonada — um território proibido conhecido apenas como <span class="destaque-roxo">a Cicatriz</span>.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>O que atrai as pessoas até lá</h3>
+      <p>Apesar dos riscos, milhares continuam entrando nas ruínas. Alguns buscam riquezas. Outros procuram conhecimento. Há quem acredite que a Cicatriz é uma maldição enviada pelos céus — e há quem creia que ela representa o <span class="destaque-roxo">próximo passo da evolução humana</span>. A substância cristalina encontrada na cidade tornou-se o recurso mais valioso do continente: pode alimentar máquinas, impulsionar pesquisas, gerar fortunas e, em circunstâncias extremamente raras, <span class="destaque-roxo">despertar poderes extraordinários</span> em seres humanos.</p>
+      <p>Até a queda, o mundo era relativamente comum: reinos, guerras, religiões, comércio, pólvora e armas de fogo. A Cicatriz alterou esse equilíbrio para sempre. A cidade deixou de ser apenas uma ruína — tornou-se o centro de uma disputa que envolve governos, mercadores, militares, cultistas, estudiosos e criminosos.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Como funciona na mesa</h3>
+      <p>Baseado em <span class="destaque-neutro">D&amp;D 5e</span>, com ênfase brutal em <span class="destaque-roxo">survival horror</span>: névoa tóxica, recursos escassos, corrupção que muta os personagens e um mundo onde ninguém é totalmente confiável. Vocês vão explorar masmorras urbanas, negociar com sobreviventes e decidir o destino da cidade. As escolhas importam: cada aliança fecha uma porta e abre outra. E a <span class="destaque-roxo">Cicatriz</span> está sempre observando.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Inspirações</h3>
+      <div class="tags">
+        <span class="tag">Hexatombe</span>
+        <span class="tag">Fallout: New Vegas</span>
+        <span class="tag">The Witcher</span>
+        <span class="tag">Resident Evil</span>
+      </div>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Pontos fortes</h3>
+      <p>Sistema de corrupção e mutação · Escolhas com peso real · Exploração de masmorras em cidade arruinada · Personagens marcantes (Despertos e sobreviventes) · Um mundo que muda conforme vocês o exploram.</p>
+    </div>
+
+    <div class="musica-info">
+      <span class="pulso pausado" data-pulso></span>
+      <span>Tema de Drakkenheim</span>
+      <button class="btn-som" data-som title="Ligar/desligar som">🔊</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PÁGINA: HORROR NO EXPRESSO DO ORIENTE
+     ============================================================ -->
+<section class="pagina" id="pagina-expresso">
+  <div class="barra-voltar">
+    <button class="btn-voltar" data-voltar>Voltar</button>
+  </div>
+
+  <div class="pagina-banner">
+    <img src="https://i.imgur.com/IiIz5A1.jpeg" alt="Horror no Expresso do Oriente">
+    <div class="sombra"></div>
+  </div>
+
+  <div class="pagina-inner">
+    <h2 class="pagina-titulo" id="titulo-expresso"></h2>
+    <p class="pagina-sub">Terror · Suspense · Investigação de alto nível</p>
+
+    <div class="info-grid">
+      <div class="info-item"><div class="rotulo">Sistema</div><div class="valor">Chamado de Cthulhu</div></div>
+      <div class="info-item"><div class="rotulo">Foco</div><div class="valor">Investigadores únicos</div></div>
+      <div class="info-item"><div class="rotulo">Duração</div><div class="valor">Campanha lendária</div></div>
+      <div class="info-item"><div class="rotulo">Vibe</div><div class="valor">Claustrofobia e ação</div></div>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>A campanha mais aclamada do Chamado de Cthulhu</h3>
+      <p>Estamos falando de uma das campanhas <span class="destaque-vermelho">mais premiadas e reverenciadas</span> da história do RPG. Ela venceu o <span class="destaque-vermelho">ENnie de Ouro</span> na categoria Melhor Aventura em 2015 e levou dois <span class="destaque-vermelho">Origins Awards</span> em 1992, incluindo Melhor Aventura de RPG. Críticos a chamam de “um marco para o Chamado de Cthulhu” e “a aventura mais ambiciosa já criada para o sistema”. São mais de <span class="destaque-neutro">1.100 páginas</span>, 19 cenários e uma jornada que atravessa Londres, Paris e Constantinopla nos anos 1920.</p>
+      <p>Mas aqui não faremos uma simples investigação passiva. <span class="destaque-vermelho">Vocês serão investigadores de verdade</span>: cada personagem terá características marcantes, habilidades próprias e um passado que importa. O foco é <span class="destaque-vermelho">ação cinematográfica com o sistema de Cthulhu</span> — perseguições no trem, confrontos desesperados, escolhas sob pressão e aquele gostinho de que qualquer passo em falso pode ser o último.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Sinopse</h3>
+      <p>O lendário <span class="destaque-vermelho">Expresso do Oriente</span> parte para sua última viagem antes do inverno fechar as rotas. A neve cai pesada, isolando os vagões do mundo. Quando um passageiro é encontrado morto em circunstâncias impossíveis, fica claro que algo além de um assassino humano está a bordo. Vocês têm até o amanhecer para descobrir a verdade — antes que o trem chegue ao seu destino final. <span class="destaque-neutro">Se é que ele chega.</span></p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>O que esperar</h3>
+      <p>Investigação em ambiente fechado · Tensão constante e escolhas morais sob pressão · Personagens com backgrounds únicos e habilidades especiais · Sanidade como recurso narrativo · Combates raros, mas brutais e cinematográficos. É a campanha perfeita para quem quer <span class="destaque-vermelho">sentir medo de verdade</span> — e sair da mesa com histórias para contar.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Inspirações</h3>
+      <div class="tags">
+        <span class="tag">Assassinato no Expresso do Oriente</span>
+        <span class="tag">O Enigma de Outro Mundo</span>
+        <span class="tag">Suspense hitchcockiano</span>
+        <span class="tag">Horror cósmico clássico</span>
+        <span class="tag">Ordem Paranormal</span>
+      </div>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Pontos fortes</h3>
+      <p>Uma das campanhas mais premiadas do gênero · Investigadores com identidade própria e mecânicas únicas · Ação e horror em equilíbrio · Um mistério que prende do primeiro ao último vagão · A experiência definitiva de Chamado de Cthulhu.</p>
+    </div>
+
+    <div class="musica-info">
+      <span class="pulso pausado" data-pulso></span>
+      <span>Tema do Expresso</span>
+      <button class="btn-som" data-som title="Ligar/desligar som">🔊</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PÁGINA: PRESSÁGIO DO FIM
+     ============================================================ -->
+<section class="pagina" id="pagina-pressagio">
+  <div class="barra-voltar">
+    <button class="btn-voltar" data-voltar>Voltar</button>
+  </div>
+
+  <div class="pagina-banner">
+    <img src="https://i.imgur.com/0vICNQv.jpeg" alt="Presságio do Fim">
+    <div class="sombra"></div>
+  </div>
+
+  <div class="pagina-inner">
+    <h2 class="pagina-titulo">Presságio do Fim</h2>
+    <p class="pagina-sub">Épico Mitológico · Profecias · Deuses e Titãs</p>
+
+    <div class="info-grid">
+      <div class="info-item"><div class="rotulo">Sistema</div><div class="valor">D&amp;D 5e</div></div>
+      <div class="info-item"><div class="rotulo">Níveis</div><div class="valor">1 – 20</div></div>
+      <div class="info-item"><div class="rotulo">Duração</div><div class="valor">Campanha épica completa</div></div>
+      <div class="info-item"><div class="rotulo">Vibe</div><div class="valor">Heroísmo e tragédia</div></div>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>A profecia do Oráculo</h3>
+      <p>No mundo de <span class="destaque-dourado">Thylea</span>, os deuses são reais, caprichosos e perigosamente próximos. No início dos tempos, uma guerra cataclísmica entre deuses e Titãs partiu o mundo. Há cinco séculos, os lendários <span class="destaque-dourado">Senhores dos Dragões</span> derrotaram os Titãs e forjaram o <span class="destaque-dourado">Juramento de Paz</span>, encerrando a Primeira Guerra. Mas o juramento está enfraquecendo. Os Titãs gêmeos <span class="destaque-dourado">Sydon e Lutheria</span> preparam sua vingança, e em sessenta dias a guerra começará.</p>
+      <p>Vocês são os heróis escolhidos pela <span class="destaque-dourado">profecia do Oráculo</span> para enfrentá-los. Como herdeiros dos Senhores dos Dragões, comandaram a lendária nau <span class="destaque-dourado">Ultros</span> pelos mares Esquecidos em busca do poder necessário para desafiar os Titãs. A Primeira Guerra começou com o Ultros. A Última Guerra terminará com ele.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Como funciona na mesa</h3>
+      <p>Uma campanha de <span class="destaque-neutro">D&amp;D 5e</span> com alma de epopeia grega, do nível 1 ao 20. Cada personagem é amarrado à história por um <span class="destaque-dourado">Caminho Épico</span> — um destino pessoal inspirado nas tragédias e heróis da mitologia clássica. Suas escolhas determinam quais aliados sobrevivem, quais inimigos se levantam, como os deuses se lembram de vocês e se Thylea será salva, conquistada ou transformada. Combates contra criaturas colossais, jornadas por ilhas esquecidas e escolhas que ecoam por gerações.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>O que esperar</h3>
+      <p>Narrativa épica com arcos pessoais profundos · Combates contra chefes colossais · Escolhas morais com peso trágico · Jornada heroica completa do nível 1 ao 20 · Um mundo onde até os deuses estão presos a juramentos e profecias.</p>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Inspirações</h3>
+      <div class="tags">
+        <span class="tag">A Odisseia</span>
+        <span class="tag">Ilíada</span>
+        <span class="tag">Mitologia grega</span>
+        <span class="tag">Assassin's Creed Odyssey</span>
+      </div>
+    </div>
+
+    <div class="bloco-texto">
+      <h3>Pontos fortes</h3>
+      <p>Uma das campanhas épicas mais completas de D&amp;D 5e · Caminhos Épicos que tornam cada herói único · Conflito divino com consequências reais · Viagens marítimas e exploração de ilhas míticas · Um final que depende inteiramente das escolhas da mesa.</p>
+    </div>
+
+    <div class="musica-info">
+      <span class="pulso pausado" data-pulso></span>
+      <span>Tema do Presságio</span>
+      <button class="btn-som" data-som title="Ligar/desligar som">🔊</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ÁUDIOS
+     ============================================================ -->
+<audio id="audio-drakkenheim" loop preload="none">
+  <source src="musicas/drakkenheim.mp3" type="audio/mpeg">
+</audio>
+<audio id="audio-expresso" loop preload="none">
+  <source src="musicas/expresso.mp3" type="audio/mpeg">
+</audio>
+<audio id="audio-pressagio" loop preload="none">
+  <source src="musicas/pressagio.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  /* =========================================================
+     TÍTULO DO EXPRESSO COM LETRAS QUE SOMEM
+     ========================================================= */
+  (function(){
+    const alvo = document.getElementById('titulo-expresso');
+    const texto = 'Horror no Expresso do Oriente';
+    alvo.innerHTML = texto.split('').map((ch, i) => {
+      if (ch === ' ') return ' ';
+      return `<span class="letra-some" style="animation-delay:${(i * 0.09).toFixed(2)}s">${ch}</span>`;
+    }).join('');
+  })();
+
+  /* =========================================================
+     NAVEGAÇÃO
+     ========================================================= */
+  const hub = document.getElementById('hub');
+  const paginas = document.querySelectorAll('.pagina');
+  const audios = {
+    'pagina-drakkenheim': document.getElementById('audio-drakkenheim'),
+    'pagina-expresso':     document.getElementById('audio-expresso'),
+    'pagina-pressagio':    document.getElementById('audio-pressagio')
+  };
+  let paginaAtual = null;
+
+  function pararTodosAudios(){
+    Object.values(audios).forEach(a => { a.pause(); a.currentTime = 0; });
+    document.querySelectorAll('[data-pulso]').forEach(p => p.classList.add('pausado'));
+    document.querySelectorAll('[data-som]').forEach(b => b.textContent = '🔊');
+  }
+
+  function abrirPagina(id){
+    pararTodosAudios();
+    hub.classList.add('escondido');
+    paginas.forEach(p => p.classList.remove('ativa'));
+
+    const pagina = document.getElementById(id);
+    if (!pagina) return;
+    pagina.classList.add('ativa');
+    paginaAtual = id;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    const audio = audios[id];
+    if (audio){
+      audio.play()
+        .then(() => {
+          const pulso = pagina.querySelector('[data-pulso]');
+          if (pulso) pulso.classList.remove('pausado');
+        })
+        .catch(() => {});
+    }
+
+    ativarObservadores(pagina);
+    ativarEfeitoScroll(pagina);
+  }
+
+  function voltarAoHub(){
+    pararTodosAudios();
+    paginas.forEach(p => p.classList.remove('ativa'));
+    hub.classList.remove('escondido');
+    paginaAtual = null;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.banner-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = card.dataset.pagina;
+      if (id) abrirPagina(id);
+    });
+  });
+
+  document.querySelectorAll('[data-voltar]').forEach(btn => {
+    btn.addEventListener('click', voltarAoHub);
+  });
+
+  document.querySelectorAll('[data-som]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pagina = btn.closest('.pagina');
+      if (!pagina) return;
+      const audio = audios[pagina.id];
+      if (!audio) return;
+
+      if (audio.paused){
+        audio.play().then(() => {
+          btn.textContent = '🔊';
+          const pulso = pagina.querySelector('[data-pulso]');
+          if (pulso) pulso.classList.remove('pausado');
+        }).catch(() => {});
+      } else {
+        audio.pause();
+        btn.textContent = '🔇';
+        const pulso = pagina.querySelector('[data-pulso]');
+        if (pulso) pulso.classList.add('pausado');
+      }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && paginaAtual) voltarAoHub();
+  });
+
+  /* =========================================================
+     REVELAR BLOCOS AO ROLAR
+     ========================================================= */
+  function ativarObservadores(pagina){
+    const blocos = pagina.querySelectorAll('.bloco-texto');
+    blocos.forEach(b => b.classList.remove('visivel'));
+
+    const observer = new IntersectionObserver((entradas) => {
+      entradas.forEach(entrada => {
+        if (entrada.isIntersecting){
+          entrada.target.classList.add('visivel');
+          observer.unobserve(entrada.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    blocos.forEach(b => observer.observe(b));
+  }
+
+  /* =========================================================
+     EFEITO DE COR PROGRESSIVA CONFORME O SCROLL
+     A intensidade vai de 0 (topo) a 1 (fim da página).
+     O glow radial cresce e se move com o scroll.
+     ========================================================= */
+  function ativarEfeitoScroll(pagina){
+    // Remove listener antigo, se houver
+    if (pagina._scrollHandler){
+      window.removeEventListener('scroll', pagina._scrollHandler);
+    }
+
+    const handler = () => {
+      const alturaTotal = document.documentElement.scrollHeight - window.innerHeight;
+      if (alturaTotal <= 0) return;
+      const progresso = Math.min(1, Math.max(0, window.scrollY / alturaTotal));
+      pagina.style.setProperty('--intensidade-scroll', progresso.toFixed(3));
+      pagina.style.setProperty('--pos-glow', (progresso * 100).toFixed(1) + '%');
+    };
+
+    pagina._scrollHandler = handler;
+    window.addEventListener('scroll', handler, { passive: true });
+    handler(); // executa uma vez ao abrir
+  }
+</script>
+</body>
+</html>
